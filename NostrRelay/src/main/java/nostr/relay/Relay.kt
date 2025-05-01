@@ -55,7 +55,8 @@ fun main() {
     Database.connect(
         url = config["pg_url"]!!,
         driver = config["pg_driver"]!!,
-        user = config["pg_user"]!!)
+        user = config["pg_user"]!!,
+        password = config["pg_password"]!!)
 
     transaction {
         addLogger(StdOutSqlLogger)
@@ -202,22 +203,25 @@ private fun onEvent(
     jsonArray: JsonArray,
     ctx: WsMessageContext
 ) {
-    val idNote = jsonArray[2].asJsonObject.get("id").asString
-    if (authentificatedUsers.contains(ctx)) {
-        try {
+    try {
+        if (authentificatedUsers.contains(ctx)) {
             val eventJson = jsonArray[1].asJsonObject
+            println(eventJson)
             val event = Event.fromJson(eventJson)
             eventReceived++
+            println(event)
             processEvent(event, event.toJson(), ctx)
-        } catch (e: Exception) {
-            println("Something went wrong with Event: ${gson.toJson(jsonArray[1])}")
-            e.printStackTrace()
         }
-    }
-    else{
-        ctx.send("""["CLOSED", "$idNote", false, "auth-required: we only accept request from registered users"]""")
+        else{
+            val idNote = jsonArray[2].asJsonObject.get("id").asString
+            ctx.send("""["CLOSED", "$idNote", false, "auth-required: we only accept request from registered users"]""")
+        }
+    } catch (e: Exception) {
+        println("Something went wrong with Event: ${gson.toJson(jsonArray[1])}")
+        e.printStackTrace()
     }
 }
+
 
 private fun onRequest(
     jsonArray: JsonArray,
@@ -265,7 +269,7 @@ private fun onAuthentification(
 }
 
 fun testKey(pk : String): Boolean {
-    val url = URL("http://localhost:8081/api/server/authorized-user/${pk}")
+    val url = URL("http://localhost:8081/api/user/authorized-user/${pk}")
     val connection = url.openConnection() as HttpURLConnection
 
     connection.requestMethod = "GET" // Pour une requête GET, changez pour "POST" si nécessaire
@@ -389,3 +393,4 @@ private fun forward(
         }
     return true
 }
+

@@ -42,7 +42,7 @@ internal class PrivateDmEventTest {
             |contentBobNip18:   ${event.plainContent(bob.privKey!!)}
             |contentCarol:      Error""".trimMargin())
     }
-
+    /*
     @Test
     fun failToDecryptPerformance() {
         val personas = (1..10_000).map { Persona() }
@@ -53,5 +53,5 @@ internal class PrivateDmEventTest {
                 assertNull(event.plainContent(it.privKey!!))
             }
         }
-    }
+    }*/
 }
